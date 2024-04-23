@@ -108,7 +108,7 @@ fi
 
 # subset centromere fasta files and create chromosome folders for fastqs and bams
 source /opt/miniconda/etc/profile.d/conda.sh
-conda activate /private/home/mcechova/.conda/envs/methylation
+conda activate cenmap
 while IFS=$'\t' read -r chr start end; do 
     samtools faidx ${genomePath} "$chr:$start-$end" > chr_fastas/${chr}.subset.fasta
     echo Creating folder for ${chr}
@@ -122,7 +122,6 @@ while IFS=$'\t' read -r chr start end; do
         mkdir readAlignments/${chr}/bams
     fi
 done < ${coordinates}
-conda deactivate
 
 # run jobArrayScript for wgsim
 sbatch --wait wgsim30xCovJobArray.sh ${chrArray} ${coverage}
@@ -145,8 +144,6 @@ for readSize in ${bamArray[@]}; do
 done
 
 # create mappability tracks for BAM files of different read sizes
-source /opt/miniconda/etc/profile.d/conda.sh
-conda activate /private/home/emxu/.conda/envs/nucfreq
 while IFS=$'\t' read -r chr start end; do
     bamArray=("1000" "5000" "10000" "15000" "20000" "40000" "60000" "80000" "100000" "200000" "300000")
     for val in ${bamArray[@]}; do

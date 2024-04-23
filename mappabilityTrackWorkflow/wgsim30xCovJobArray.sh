@@ -29,9 +29,9 @@ bamArray=("1000" "5000" "10000" "15000" "20000" "40000" "60000" "80000" "100000"
 faPath="chr_fastas/${chr}.subset.fasta" 
 fqPath="readAlignments/${chr}/fastqs"
 
-# activate wgsim env 
+# activate cenmap env 
 source /opt/miniconda/etc/profile.d/conda.sh
-conda activate wgsim
+conda activate cenmap
 
 # simulate fastq files for all read sizes
 for val in ${bamArray[@]}; do

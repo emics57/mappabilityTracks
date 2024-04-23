@@ -23,16 +23,12 @@ chr=$(awk -v ArrayTaskID=$SLURM_ARRAY_TASK_ID '$1==ArrayTaskID {print $2}' ${inp
 # Print to a file a message that includes the current $SLURM_ARRAY_TASK_ID and the chromosome name
 echo "This is array task ${SLURM_ARRAY_TASK_ID}, the chromosome name is ${chr}"
 
-# activate minimap2v2.26 conda env
-echo "activate MINIMAP2v2.26 conda env"
 source /opt/miniconda/etc/profile.d/conda.sh
-# conda activate /private/home/emxu/.conda/envs/winnowmap
+conda activate cenmap
+# if using winnowmap then create kmer file using meryl
 if [ ${aligner} == 'winnow' ]; then
-    conda activate /private/home/emxu/.conda/envs/winnowmap
     meryl count k=15 output merylDB ${genome}
     meryl print greater-than distinct=0.9998 merylDB > readAlignments/repetitive_k15.txt
-else
-    conda activate /private/home/mcechova/.conda/envs/methylation
 fi
 
 # alignment
