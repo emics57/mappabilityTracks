@@ -9,8 +9,15 @@ This project was first conceptualized to understand the mappability of human cen
 5. The regions where the uniquely mapped reads mapped to would be considered 'mappable'. BED files (mappability tracks) of where the mappable regions are are generated
 
 ## To obtain mappability tracks of centromeres:
-1. Download all the scripts within the MappabilityTrackWorkflow folder to the Phoenix server 
-2. Run ```CenMap.sh```
+1. Download all the scripts within the ```MappabilityTrackWorkflow folder``` to your HPC server
+2. Set up your environment before running the script:
+
+    ```conda create -n cenmap samtools=1.16.1 minimap2=2.26 winnowmap=2.03 pysam=0.21.0 pandas```
+
+    You don't have to activate the conda environment before running the script because the script should activate it for you.
+    Be sure to name the conda environment properly as ```cenmap```.
+
+4. Run ```CenMap.sh```
 
 ## CenMap.sh Parameters: 
 ```
@@ -19,10 +26,12 @@ This project was first conceptualized to understand the mappability of human cen
 -n [optional; int] Coverage of simulated reads. Default to generating 30x coverage
 -a [optional; string] Type of aligner (Minimap2 or Winnowmap) Default to minimap2. To use winnowmap, specify '-a winnow'
 ```
+
 ## Examples on how to run CenMap.sh:
 ```
 # Uses Minimap2 to map reads at 30x coverage
 sbatch CenMap.sh -g hg002v1.0.1.fasta -b hg002v1.0.1.activehor.expanded5MB.bed
+
 # Uses Winnowmap to map reads at 30x coverage
 sbatch CenMap.sh -g hg002v1.0.1.fasta -b hg002v1.0.1.activehor.expanded5MB.bed -a winnow
 ```
