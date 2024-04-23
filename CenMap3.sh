@@ -150,7 +150,7 @@ conda activate /private/home/emxu/.conda/envs/nucfreq
 while IFS=$'\t' read -r chr start end; do
     bamArray=("1000" "5000" "10000" "15000" "20000" "40000" "60000" "80000" "100000" "200000" "300000")
     for val in ${bamArray[@]}; do
-        python3 /private/groups/migalab/emxu/tools/mappabilityTracks.py -b readAlignments/${chr}/bams/${val}.bam -o chrMap${val}bp/${chr}.mappability.bed
+        python3 mappabilityTracks.py -b readAlignments/${chr}/bams/${val}.bam -o chrMap${val}bp/${chr}.mappability.bed
     done
 done < ${coordinates}
 conda deactivate
