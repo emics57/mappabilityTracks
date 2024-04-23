@@ -80,6 +80,7 @@ while getopts 'g:b:n:a:' flag; do
   esac
 done
 
+echo These are the coordinates: ${coordinates}
 # if coordinate param (BED file of coordinates) is not given, generate coordinates for entire genome
 if [ -z ${coordinates} ]; then
     samtools faidx ${genomePath} > ${genomePath}.fai
@@ -106,6 +107,11 @@ if [ ! -d "chr_fastas" ]; then
   mkdir chr_fastas
 fi
 
+if [ ! -d "readAlignments" ]; then
+  mkdir readAlignments
+fi
+
+echo These are the coordinates: ${coordinates}
 # subset centromere fasta files and create chromosome folders for fastqs and bams
 source /opt/miniconda/etc/profile.d/conda.sh
 conda activate cenmap
@@ -134,11 +140,15 @@ rm -r chr_fastas
 sbatch --wait alignmentJobArray.sh ${genomePath} ${chrArray} ${aligner}
 echo alignment jobs have completed.
 
+if [ ! -d "readAlignments" ]; then
+  mkdir readAlignments
+fi
+
 # create mappability track folders for different read sizes
 bamArray=("1000" "5000" "10000" "15000" "20000" "40000" "60000" "80000" "100000" "200000" "300000")
 for readSize in ${bamArray[@]}; do
-    if [ ! -d "chrMap${readSize}bp" ]; then
-        mkdir chrMap${readSize}bp
+    if [ ! -d "mapTrack/chrMap${readSize}bp" ]; then
+        mkdir mapTrack/chrMap${readSize}bp
         echo created mappability folder for ${readSize}bp
     fi
 done
@@ -147,17 +157,19 @@ done
 while IFS=$'\t' read -r chr start end; do
     bamArray=("1000" "5000" "10000" "15000" "20000" "40000" "60000" "80000" "100000" "200000" "300000")
     for val in ${bamArray[@]}; do
-        python3 mappabilityTracks.py -b readAlignments/${chr}/bams/${val}.bam -o chrMap${val}bp/${chr}.mappability.bed
+        python3 mappabilityTracks.py -b readAlignments/${chr}/bams/${val}.bam -o mapTrack/chrMap${val}bp/${chr}.mappability.bed
     done
 done < ${coordinates}
 conda deactivate
 
-# remove intermediate readAlignment folder
-# rm -r readAlignment
-
 # merge chr.mappability.bed all together into one BED file for each read size
 for readSize in ${bamArray[@]}; do
-    cat chrMap${readSize}bp/*.bed > mappability.${readSize}bp.bed
+    cat mapTrack/chrMap${readSize}bp/*.bed > mappability.${readSize}bp.bed
 done
+
+# remove intermediate readAlignment folder
+# rm -r readAlignment
+rm chrList.txt
+rm -r mapTrack
 
 echo mappability tracks are done.
