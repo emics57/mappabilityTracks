@@ -1,7 +1,7 @@
 ## Background
 This project was first conceptualized to understand the mappability of human centromeres at different read sizes, specifically interested in long reads and understanding at what read size (most of) the centromere is mappable. Mappability can be defined as whether unique reads map to a certain region or not. If a region does not have any uniquely mapped reads mapped to it, then it is not considered a mappable region. As read size increases, the number of mappable regions should also increase, and we want to know what is the minimum read size we can be confident in regards to centromere mappability. 
 
-![alt text](https://drive.google.com/file/d/1BL8sMLTd1UrTC0aYRegqL-DPpS8UgZrr/view?usp=sharing)
+![alt text](mappabilityTracks/imgs/poster.png)
 
 ## Methods:
 1. Subset the specified regions from the genome assembly (e.g. the centromeres)

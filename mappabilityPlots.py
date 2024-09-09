@@ -96,7 +96,7 @@ for j in readLengths:
     sameChrDF = sameChrDF[~sameChrDF[0].isin(diffChrDF[0])]
     # filtering for just the top multi aligned reads
     completeAlignment = sameChrDF[(sameChrDF[3] == f'{j}M') & ( sameChrDF[4] == 2*j) & (sameChrDF[5] == 0)]
-
+    
     read_counts = completeAlignment[0].value_counts()
 
     # Get a list of reads that appear 3 times or less

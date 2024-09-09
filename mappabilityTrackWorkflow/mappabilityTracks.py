@@ -38,6 +38,8 @@ def createCoords(df):
     This function takes in a dataframe of read alignments and 
     outputs a list of coordinates that define regions where reads uniquely map to.
     """
+    readSize = df[4]
+    chrName = df[3]
     # obtain uniquely mapped reads
     value_counts = df[0].value_counts()
     unique_mapped_values = value_counts[value_counts == 1].index.tolist()
@@ -49,6 +51,33 @@ def createCoords(df):
     mappedCoord = list(zip(unique_mapped_df[5], unique_mapped_df[6]))
     mappedCoord.sort()
     mappedCoord = sorted(mappedCoord, key=lambda x: x[0])
+
+    # INCLUDE MULTIMAPPED READS
+    # Extract read IDs that appear more than once
+    multi_mapped_values = value_counts[value_counts > 1].index.tolist()
+    sameChrDF = multi_mapped_df[multi_mapped_df[2].str.startswith(chrName[:5])]
+    diffChrDF = multi_mapped_df[~multi_mapped_df[2].str.startswith(chrName[:5])] 
+    # exclude reads that are in the diffChr dataframe
+    sameChrDF = sameChrDF[~sameChrDF[0].isin(diffChrDF[0])]
+    # filtering for just the top multi aligned reads
+    completeAlignment = sameChrDF[(sameChrDF[3] == f'{readSize}M') & ( sameChrDF[4] == 2*readSize) & (sameChrDF[5] == 0)]
+
+    read_counts = completeAlignment[0].value_counts()
+
+    # Filter all reads to get the multi-mapped reads
+    multi_mapped_df = df[df[0].isin(multi_mapped_values)]
+    multi_mapped_df.loc[:,5] = multi_mapped_df[5].astype(int)
+    multi_mapped_df.loc[:,6] = multi_mapped_df[6].astype(int)
+    
+    reads3Aligns = read_counts[read_counts == 3].index
+    reads2Aligns = read_counts[read_counts == 2].index
+    reads1Aligns = read_counts[read_counts == 1].index
+
+    reads3AlignDF = completeAlignment[completeAlignment[0].isin(reads3Aligns)]
+    reads2AlignDF = completeAlignment[completeAlignment[0].isin(reads2Aligns)]
+    reads1AlignDF = completeAlignment[completeAlignment[0].isin(reads1Aligns)]
+
+    read_counts = completeAlignment[0].value_counts()
 
     # define uniquely mapped regions
     tupleList=[]
