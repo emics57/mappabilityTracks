@@ -186,7 +186,7 @@ for ypos in range(1,len(finalList)):
                 count+=1
 
 panel2.set_xlim(derivedStartCoord - 5000,derivedEndCoord + 5000)  # HARDCODE
-panel2.set_ylim(-1,350)
+panel2.set_ylim(-1,100)
 panel2.set_xlabel('Genomic Coordinate (Mb)')
 # panel2.set_xticks(['57','58','59','60','61','62'])
 # plt.title(f'{i} Read Coverage for {j}bp read size')
