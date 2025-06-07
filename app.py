@@ -1,3 +1,5 @@
+# Run in command line: shiny run app.py
+
 import seaborn as sns
 from shiny import reactive
 from pathlib import Path
@@ -16,7 +18,6 @@ ui.page_opts(
     fillable=True
     )
 
-ui.nav_spacer()  # Push the navbar items to the right
 
 footer = ui.input_select(
     "var", "Select variable", choices=["bill_length_mm", "body_mass_g"]
@@ -24,9 +25,9 @@ footer = ui.input_select(
 
 @reactive.calc
 def readBAMFile():
-    # bamFile = Path(__file__).parent / "100000.bam"
+    if not input.file1():
+        return
     bamFile = input.file1()[0]['datapath']
-    print(bamFile)
     alignments = pysam.AlignmentFile(bamFile,"rb")
     bam_data = []
     for read in alignments:
@@ -49,9 +50,7 @@ def readBAMFile():
         bam_data.append([readName,derivedChr,readStart,mappedChr,flag,mapQ,cigarSize,cigarString,derivedStart,derivedEnd,mappedStart,mappedEnd,nmScore,asScore])
 
     colNames = ['readID','derivedChr','readStart','mappedChr','flag','MapQ','cigarSize','cigarString','derivedStart','derivedEnd','mappedStart','mappedEnd','nmScore','asScore']
-
     bamDF = pd.DataFrame(bam_data,columns=colNames)
-
     return bamDF
 
 here = Path(__file__).parent
@@ -60,16 +59,21 @@ with ui.nav_panel("About"):
     "Read Categorization for Genome Mappability"
     @render.image
     def backgroundImage():
-        img = {"src": here / "imgs/mapCategories.png", "width": "800px"}  
+        img = {"src": here / "imgs/backgroundMap.png", "width": "500px"}  
         return img
-
-    # def mappabilityCategorizationImage():
+    
+    @render.image
+    def mappabilityCategorizationImage():
+        img = {"src": here / "imgs/mapCategories.png", "width": "500px"}  
+        return img
 
 
 with ui.nav_panel("Upload Data"):
-    MAX_SIZE = 50000
-    ui.input_file("file1", "Choose a file to upload:", multiple=True)
-    ui.input_radio_buttons("type", "Type:", ["BAM", "SAM"])
+    with ui.navset_card_underline(title="Mappability Coverage Tracks"):
+        with ui.nav_panel("Upload"):
+            MAX_SIZE = 50000
+            ui.input_file("file1", "Choose a file to upload:", multiple=True)
+            ui.input_radio_buttons("type", "Type:", ["BAM", "SAM"])
 
 
 with ui.nav_panel("Genome Viewer"):
@@ -78,11 +82,9 @@ with ui.nav_panel("Genome Viewer"):
 
             @render.plot
             def hist():
-                # p = sns.histplot(
-                #     df, x=input.var(), facecolor="#007bc2", edgecolor="white"
-                # )
-                # return p.set(xlabel=None)
                 df = readBAMFile()
+                if df is None or df.empty:
+                    return
                 readSize=df.loc[0,'cigarSize']
                 derivedStartCoord = df.loc[0, 'derivedStart']
                 derivedEndCoord = df.loc[0, 'derivedEnd']
@@ -139,17 +141,9 @@ with ui.nav_panel("Genome Viewer"):
 
                 figureWidth=8
                 figureHeight=5
-                # fig = plt.figure(figsize=(figureWidth,figureHeight))
-                # panelHeight=4
-                # panelWidth=8
-                # panel2 = fig.add_axes([0.1/figureWidth,1.7/figureHeight,panelWidth/figureWidth,panelHeight/figureHeight])
                 fig, panel2 = plt.subplots(figsize=(figureWidth, figureHeight))
 
-
-                iBlue=(88/255,85/255,120/255)
-
                 finalList.sort(key=itemgetter(0))
-                countDict = {}
                 count=0
 
                 for ypos in range(1,len(finalList)):
@@ -175,10 +169,8 @@ with ui.nav_panel("Genome Viewer"):
                 return fig
 
         with ui.nav_panel("Table"):
-
             @render.data_frame
             def data():
-                # return df[["species", "island", input.var()]]
                 return readBAMFile()
 
     
